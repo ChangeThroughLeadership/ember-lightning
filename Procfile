@@ -1,2 +1,1 @@
-#!/usr/bin/env bash
-node index.js
+web: node index.js
