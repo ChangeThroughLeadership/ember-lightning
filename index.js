@@ -6,13 +6,13 @@ var redis = require('redis'),
 
 var app = koa(),
     client  = redis.createClient(
-      process.env.REDIS_PORT,
-      process.env.REDIS_HOST
+      process.env.VCAP_SERVICES.rediscloud.credentials.port,
+      process.env.VCAP_SERVICES.rediscloud.credentials.hostname
     ),
     dbCo = coRedis(client);
 
-if (process.env.REDIS_SECRET) {
-  client.auth(process.env.REDIS_SECRET);
+if (process.env.VCAP_SERVICES.rediscloud.credentials.password) {
+  client.auth(process.env.VCAP_SERVICES.rediscloud.credentials.password);
 }
 
 client.on('error', function (err) {
@@ -24,9 +24,9 @@ app.use(function* () {
   var indexkey;
 
   if (this.request.query.index_key) {
-    indexkey = process.env.APP_NAME +':'+ this.request.query.index_key;
+    indexkey = process.env.VCAP_APPLICATION.application_name +':'+ this.request.query.index_key;
   } else {
-    indexkey = yield dbCo.get(process.env.APP_NAME +':current');
+    indexkey = yield dbCo.get(process.env.VCAP_APPLICATION.application_name +':current');
   }
   var index = yield dbCo.get(indexkey);
 
@@ -37,4 +37,4 @@ app.use(function* () {
   }
 });
 
-app.listen(process.env.PORT || 3000);
+app.listen(process.env.VCAP_APP_PORT || 3000);
