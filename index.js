@@ -6,17 +6,16 @@ var redis = require('redis'),
     cfenv = require("cfenv");
 
 var appEnv = cfenv.getAppEnv();
-var rediscloud = appEnv.getService('rediscloud');
 
 var app = koa(),
     client  = redis.createClient(
-      rediscloud.credentials.port,
-      rediscloud.credentials.hostname
+      appEnv.services.rediscloud[0].credentials.port,
+      appEnv.services.rediscloud[0].credentials.hostname
     ),
     dbCo = coRedis(client);
 
-if (rediscloud.credentials.password) {
-  client.auth(rediscloud.credentials.password);
+if (appEnv.services.rediscloud[0].credentials.password) {
+  client.auth(appEnv.services.rediscloud[0].credentials.password);
 }
 
 client.on('error', function (err) {
