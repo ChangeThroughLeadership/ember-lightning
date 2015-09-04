@@ -28,6 +28,7 @@
     "co-redis": "^1.1.1",
     "hiredis": "^0.3.0",
     "koa": "^0.19.1",
+    "newrelic": "^1.22.0",
     "redis": "^0.12.1"
   },
   "engines": {
