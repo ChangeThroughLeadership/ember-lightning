@@ -1,13 +1,14 @@
 'use strict';
 
-var redis = require('redis'),
+const redis = require('redis'),
+    co = require('co'),
     coRedis = require('co-redis'),
-    koa = require('koa'),
+    Koa = require('koa'),
     cfenv = require("cfenv");
 
-var appEnv = cfenv.getAppEnv();
+const appEnv = cfenv.getAppEnv();
 
-var app = koa(),
+const app = new Koa(),
     client  = redis.createClient(
       appEnv.services.rediscloud[0].credentials.port,
       appEnv.services.rediscloud[0].credentials.hostname
@@ -22,22 +23,28 @@ client.on('error', function (err) {
   console.log('Redis client error: ' + err);
 });
 
-app.use(function* () {
+app.use(co.wrap(function* (ctx) {
 
   var indexkey;
 
-  if (this.request.query.index_key) {
-    indexkey = appEnv.name +':'+ this.request.query.index_key;
+  if (ctx.request.query.index_key) {
+    indexkey = appEnv.name +':'+ ctx.request.query.index_key;
   } else {
-    indexkey = yield dbCo.get(appEnv.name +':current');
+    indexkey = appEnv.name +':current-content';
   }
   var index = yield dbCo.get(indexkey);
 
   if (index) {
-    this.body = index;
+    ctx.body = index;
   } else {
-    this.status = 404;
+    ctx.status = 404;
   }
-});
+}));
 
-app.listen(appEnv.port || 3000);
+var server = app.listen(appEnv.port || 3000);
+
+process.on('SIGINT', function () {
+  server.close(function () {
+    process.exit(0);
+  });
+});
