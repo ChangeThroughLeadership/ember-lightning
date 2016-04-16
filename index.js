@@ -28,9 +28,9 @@ app.use(co.wrap(function* (ctx) {
   var indexkey;
 
   if (ctx.request.query.index_key) {
-    indexkey = appEnv.name +':'+ ctx.request.query.index_key;
+    indexkey = appEnv.name +':index:'+ ctx.request.query.index_key;
   } else {
-    indexkey = appEnv.name +':current-content';
+    indexkey = appEnv.name +':index:current-content';
   }
   var index = yield dbCo.get(indexkey);
 
